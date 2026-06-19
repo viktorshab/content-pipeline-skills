@@ -1,6 +1,6 @@
 ---
 name: email-sequence-writer
-description: Пишет серию из 5 email-писем (welcome · value · pain · offer · deadline) для прогрева и конвертации подписчика — из разбора аудитории (dna.md / offer.md / objections.md). Боли дословным языком клиента, разговорный тон, subject 40-60 символов. Вызывай когда пользователь просит: серия писем, email-воронка, прогревающая рассылка, письма для рассылки, welcome-цепочка, email sequence, письмо для подписчиков.
+description: "Пишет серию из 5 email-писем (welcome · value · pain · offer · deadline) для прогрева и конвертации подписчика — из разбора аудитории (dna.md / offer.md / objections.md). Боли дословным языком клиента, разговорный тон, subject 40-60 символов. Вызывай когда пользователь просит: серия писем, email-воронка, прогревающая рассылка, письма для рассылки, welcome-цепочка, email sequence, письмо для подписчиков."
 version: 1.0
 category: organic
 inputs:

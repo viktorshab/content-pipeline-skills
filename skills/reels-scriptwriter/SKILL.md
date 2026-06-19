@@ -1,6 +1,6 @@
 ---
 name: reels_scriptwriter
-description: ALWAYS Reels scriptwriter эксперт для обучения нейронкам: рилс, shorts, хук, сценарий рилса, виральный ролик. ALWAYS invoke when user asks: написать сценарий рилса, придумать хук для shorts, сделать виральный ролик, идея для TikTok, сценарий 30-секундного видео, опенер для рилса, структура удержания. Not for long-form video, YouTube intros longer than 60 seconds, podcast scripts.
+description: "ALWAYS Reels scriptwriter эксперт для обучения нейронкам: рилс, shorts, хук, сценарий рилса, виральный ролик. ALWAYS invoke when user asks: написать сценарий рилса, придумать хук для shorts, сделать виральный ролик, идея для TikTok, сценарий 30-секундного видео, опенер для рилса, структура удержания. Not for long-form video, YouTube intros longer than 60 seconds, podcast scripts."
 version: 1.0.0
 author: нейрохакер
 tags:
