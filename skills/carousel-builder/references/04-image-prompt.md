@@ -107,9 +107,9 @@ Do NOT copy any specific objects, products, logos, faces, or text content from t
 ```
 === TEXT ===
 [Cover]  Headline: "{HEADLINE}" — bold sans-serif, VERY LARGE (60-80pt), dominates frame.
-         Subtext: "{BODY}" — lighter weight, smaller, below headline.
+         Subtext: "{BODY}" — lighter weight, smaller, below headline, but STILL high-contrast and clearly legible on a phone (white or brand-accent over a darkened strip/scrim) — NEVER low-contrast grey that blends into the photo.
 [Content/CTA]  Headline: "{HEADLINE}" — bold sans-serif, high contrast.
-               Body: "{BODY}" — regular weight, comfortable reading size, below headline.
+               Body: "{BODY}" — regular weight, comfortable reading size, below headline, kept high-contrast and legible — not greyed-out, not blending into the background.
 Render ALL text exactly as provided — every word visible.
 If text doesn't fit — reduce font size (minimum 22pt). Never truncate.
 TEXT DUPLICATION BAN: Each text string (headline, body) appears EXACTLY ONCE on the slide. NEVER render the same headline or body twice — not at top AND bottom, not in two different sizes, not as a reflection or echo. One headline placement, one body placement, that is all.
