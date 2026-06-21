@@ -1,43 +1,73 @@
-# Лицо в кадре — как держать своё лицо (identity-lock)
+# Лицо и товар в кадре: identity-lock
 
-Памятка под слайды/обложки с вашим лицом. Движок лица — **Image 2 (gpt-image-2, в Codex)**: по тесту он держит лицо, Flux-reference — нет, nano-banana-pro умеет, но с возни. Постоянное своё лицо «на потоке» (пачки контента) — это обучение модели (Flux LoRA / Soul ID), отдельный путь Урока 2; одиночный фото-референс его не заменяет.
+Эта памятка нужна, если у пользователя есть фото-референс лица, товара, места или стиля.
 
-## 1. Роли референсов
-В промте явно скажи модели, ЧТО за фото ты дал:
-- загруженные фото — это **identity-референсы (только лицо)**, не копировать их фон/одежду/позу;
-- если есть отдельное фото-стиль — пометь `style reference only, do not copy the face`.
+## Принцип
 
-## 2. Полный landmark-lock (перечисляй, не «тот же человек»)
-Общее «same person» модель усредняет. Перечисляй неизменяемые черты:
-`face shape, facial proportions, bone structure, eye shape and spacing, eyelids, brow, nose bridge, nose tip, nostrils, cheekbones, jawline, chin, mouth shape, lips, smile lines, skin tone, natural skin texture, hairline, hairstyle outline, facial hair, moles, freckles, scars, natural asymmetry` → `SAME exact person, instantly recognizable`.
+Не проси модель "сделать того же человека". Опиши узнаваемые признаки и запрети усреднение.
 
-## 3. Анти-усреднение (иначе модель «улучшит» тебя в незнакомца)
-**НЕ ставь голое `no beautification`** — на фотореализме оно читается как «не сглаживай» и СТАРИТ лицо. Ставь:
-`no over-beautified influencer face`, `no plastic/waxy skin`, и явный запрет дрейфа:
-`do NOT make the person younger / more generic / more symmetrical / more handsome — keep the real face`.
-Кожа: `natural skin texture with visible pores, subtle asymmetry, believable imperfections`.
+## Перед prompt
 
-## 4. Структура промта лица
-`Image roles → Identity lock (landmark list) → Realism → Change (что меняем: сцена/свет/одежда) → Constraints (запреты дрейфа)`. Identity-блок НЕ меняется от кадра к кадру — меняется только сцена.
+Сначала проанализируй референс:
 
-## 5. Эталонный identity-блок (вставлять вместе с описанием сцены)
+- форма лица;
+- пропорции глаз;
+- нос;
+- губы;
+- линия челюсти;
+- волосы;
+- возрастной диапазон;
+- мимика;
+- особенности кожи;
+- стиль одежды;
+- аксессуары;
+- что нельзя менять.
+
+Для товара:
+
+- форма;
+- материал;
+- цвет;
+- логотип;
+- пропорции;
+- упаковка;
+- маркировка;
+- что нельзя менять.
+
+## Identity block
 
 ```text
-IMAGE ROLES: The uploaded photos are IDENTITY REFERENCES ONLY of the same real person. Use them strictly to reproduce the exact face and head; do NOT copy their backgrounds, outfits, lighting or poses.
-IDENTITY LOCK: face shape, facial proportions, bone structure, eye shape and spacing, eyelids, brow, nose bridge, nose tip, nostrils, cheekbones, jawline, chin, mouth shape, lips, smile lines, skin tone, natural skin texture, hairline, hairstyle outline, facial hair, moles, freckles, scars, natural asymmetry. SAME exact person, instantly recognizable.
-REALISM: real photograph, natural skin texture with visible pores, subtle asymmetry, believable imperfections, realistic hair. NO plastic or waxy skin, NO airbrushing, NO over-beautified influencer face, NO anime, NO CGI.
-CONSTRAINTS: do NOT make the person younger, more generic, more symmetrical, more glamorous or more handsome; keep the real face exactly. No extra people, no text, no watermark, no distorted eyes, no face-swap artifacts.
+Identity lock:
+Use the attached reference as identity source. Preserve recognizable facial structure, proportions, hair, age range and natural expression. Do not beautify, stylize into a different person, change ethnicity, change age, alter jawline, nose, eye shape or lips. Change only pose, lighting, framing and scene as specified.
 ```
 
-Подавай 3–6 чистых фото лица (разные ракурсы: фронт / три четверти / профиль), без фильтров и тяжёлого макияжа.
+Для товара:
 
-## 6. Несколько вариантов + отбраковка — это норма
-Лицо с первого кадра может «уплыть» — не провал, а часть процесса: **сгенерируй несколько → отбракуй по landmark → перегенерируй**. Не гони серию цепочкой из уже-сгенерированных кадров (артефакты копятся) — возвращайся к исходным фото. Для серии — сначала сделай «лист-эталон» (несколько ракурсов одного лица) и подавай его референсом.
+```text
+Product identity lock:
+Use the attached product reference as the source of truth. Preserve exact shape, proportions, material, color, logo placement and packaging details. Do not invent labels, change brand marks, alter proportions or replace the product with a generic object.
+```
 
-## 7. Размеры под лицо
-- Image 2 / Codex вертикаль = **максимум 2:3 (1024×1536)**.
-- Ровное **4:5** ленты — кропни кадр Image 2 или генери через nano-banana-pro (`aspect_ratio: "4:5"`).
-- Настоящий **9:16** — только через OpenAI API напрямую: **1152×2048** или **1440×2560** (сторона кратна 16; «1080×1920» API отвергнет).
-- Лицо при любом формате ведёт **Image 2** — кропим его кадр, движок лица не меняем.
+## Style-anchor
 
-*Меняющиеся числа (размеры, лимиты, цены) сверяй с актуальными доками на день работы.*
+Если генерируется серия слайдов:
+
+1. Сначала сделать cover или style-anchor.
+2. Для следующих слайдов использовать style-anchor plus identity reference.
+3. Менять сцену и композицию, но сохранять свет, цвет, настроение, визуальный язык.
+
+## Отбраковка
+
+Сгенерированный кадр не проходит, если:
+
+- лицо стало другим;
+- модель "улучшила" человека до неузнаваемости;
+- товар потерял форму или логотип;
+- стиль слайда выбивается из набора;
+- текст залез на лицо или товар;
+- руки, глаза, зубы или важные детали заметно сломаны;
+- кадр выглядит как stock image вместо бренда автора.
+
+## Важное ограничение
+
+Один фото-референс не гарантирует стабильное лицо на потоке. Для постоянного персонажа или большого объема может потребоваться отдельная модель, обученный identity workflow или ручная отбраковка. В skill не обещать стабильность как гарантию.

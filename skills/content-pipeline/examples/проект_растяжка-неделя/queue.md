@@ -1,15 +1,12 @@
-# queue — план недели (Шаг 5, живой прогон)
-> Ниша: онлайн-студия растяжки. Тема: «Ты не деревянный — держат не те мышцы». Один источник → 6 единиц под площадки. Статус всех — **черновик** (на «утверждено» переводит человек руками, когда проверит).
+# Queue: план недели
 
-| День | Площадка | Формат | Тема (угол) | Картинка | Файл | Статус |
-|---|---|---|---|---|---|---|
-| Пн | Instagram (лента) | Пост | «Ты не деревянный» — снять вину | 4:5 | `01-post.md` | черновик |
-| Вт | X / Threads | Тред | где настоящий зажим (таз/поясница) | 16:9 | `02-thread.md` | черновик |
-| Ср | Instagram | Карусель (7 слайдов) | по шагам: где думаешь зажим / где он есть | слайды 4:5 | `03-carousel/` | черновик |
-| Чт | Instagram / TikTok | Reels | ★ «Ты не деревянный» (аватар) | 9:16 | `04-reels.md` | черновик |
-| Пт | Telegram (канал) | Пост | личный разбор слова «деревянный» | 16:9 / без | `05-telegram.md` | черновик |
-| по триггеру подписки | Email | Письмо (value) | что делать сегодня: разогрев / выдох / частота | без | `06-email.md` | черновик |
+> Ниша: онлайн-студия растяжки. Тема: "Тело не деревянное. Держит не то место". Статус всех единиц: draft.
 
-**Раскладка:** тяжёлый разбор (пост, тред, карусель) чередуется с живым форматом (Reels, личный Telegram), чтобы неделя не была монотонной. Письмо не привязано к дню недели — уходит по триггеру подписки как value-письмо серии.
-
-**Публикация:** из этой очереди, **по одному**, с подтверждением перед каждым выходом (звено публикатора прошлого модуля). Очередь сама наружу ничего не шлёт.
+| Date | Platform | Format | Angle | File | Asset need | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| Mon | Instagram | Feed post | wrong enemy | `10-пакет-неделя/01-post.md` | 4:5 cover | draft | health wording check |
+| Tue | X / Threads | Thread | mechanism | `10-пакет-неделя/02-thread.md` | optional 16:9 | draft | can become Threads post + replies |
+| Wed | Instagram | Carousel | checklist / myth | `10-пакет-неделя/03-carousel-каркас.md` | 4:5 slides | draft | stop-gate before images |
+| Thu | Reels / TikTok / Shorts | Short video | wrong enemy | `10-пакет-неделя/04-reels.md` | 9:16 cover | draft | face/avatar/b-roll |
+| Fri | Telegram | Channel post | trust reframe | `10-пакет-неделя/05-telegram.md` | optional | draft | soft discussion CTA |
+| Sat | Email | Single value email | trust + mechanism | `10-пакет-неделя/06-email.md` | none | draft | deliverability reminder |

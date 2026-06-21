@@ -1,155 +1,165 @@
-# Сборка промта картинки слайда + identity-lock (дословный перенос Vibe)
+# Сборка image prompt для слайда
 
-> Финальный шаг: на каждый слайд собрать image-промт и вызвать движок. Текст рисует модель ВНУТРИ кадра (Вариант Б). Единство держится style-anchor'ом первого слайда + identity-lock + единым каркасом.
-> Порядок сборки промта: consistency-frame → язык → формат → сцена по типу → план директора → блок референсов (identity-lock) → секция TEXT → ограничения → запреты.
+Этот файл отвечает за финальный prompt к картинке. Он не выбирает стратегию карусели, а превращает утвержденный slide copy и scene plan в prompt для выбранного image-движка.
 
----
+Перед использованием прочитай:
 
-## 1. Consistency-frame (ставится ПЕРВЫМ в каждый промт — держит единый бренд)
-
-```
-STYLE: {styleDNA из 02-styles.md}
-TOPIC: {тема, до 100 символов}
-VISUAL THEME (MANDATORY on every slide, overrides generic backgrounds): {1-2 конкретных визуала по теме}
-THEMATIC CONSISTENCY (HARD RULE): Every slide shares the SAME background theme tied to the LITERAL topic. If about travel — every slide lives in the travel scene. If about a beach summer — every slide is a beach summer scene. NEVER pick a generic white/gradient background that ignores the subject matter. NEVER add cosmos / galaxy / starfield / planetary backgrounds unless the topic is literally about space or astronomy. The theme IS the background, drawn from the topic itself.
-THIS APPLIES TO ALL SLIDES INCLUDING THE LAST (CTA) SLIDE. The CTA slide must live in the SAME visual world as slides 1-4. Never switch to a generic cafe, office, park, or unrelated "lifestyle" setting on the final slide.
-CONSISTENCY: Same fonts, color accents, and background mood across all slides. Text always high-contrast and readable.
+```text
+06-engine-passport.md
+07-лицо-identity.md, если есть лицо или товар
 ```
 
-## 2. Язык текста (для русского — дословно)
+## Prompt contract
 
-```
-Use Russian language for all text. Render exact Russian text verbatim with correct Cyrillic spelling.
-```
-(украинский: `Use Ukrainian Cyrillic text verbatim. Correct Ukrainian letters.`)
+Каждый prompt должен содержать:
 
-## 3. Формат холста
+1. Format and aspect ratio.
+2. Visual scene.
+3. Composition and camera.
+4. Lighting and mood.
+5. Text zone.
+6. Exact text, если выбран image-text mode.
+7. Style continuity.
+8. Reference images.
+9. Identity-lock, если есть лицо или товар.
+10. Negative constraints.
+11. Output name.
 
-Тут две разные вещи, их легко перепутать:
+## 1. Consistency frame
 
-- **В ТЕКСТ промта** идёт словесное описание пропорций. Для ленты — строка `Vertical 4:5 format for Instagram feed posts` (берётся из `ASPECT_RATIO_DESCRIPTION`). Для сторис — `Tall 9:16 format for Stories/Reels — leave top 14% and bottom 20% clear of critical text` (safe-зоны под интерфейс сторис обязательно оставить).
-- **Размер итогового кадра** — это отдельный параметр `size` в вызове движка, НЕ часть текста промта. Для 4:5 выходной кадр = **1080×1350 px** (из `AR_DIMENSIONS`); для 9:16 = 1080×1920 px. То есть `1080×1350` — это разрешение картинки на выходе, а не строка, которую читает модель.
+В начало каждого prompt добавляй:
 
-## 4. Сцена по типу слайда
-
-- **Cover (слайд 1):** `Cover slide 1 of {N}. Headline fills top 40% in massive bold font. One strong visual element below. Small "листай →" hint at bottom-right corner.`
-- **Content:** `Content slide {i} of {N}. THIS SLIDE'S MESSAGE: "{headline}" — the visual scene MUST illustrate this specific point. Choose a scene, angle, or visual metaphor that makes the viewer FEEL and UNDERSTAND the headline before reading it. The image is not decoration — it is the primary storytelling vehicle.`
-- **CTA (последний):** `Final slide {N} — keep the SAME visual theme/palette/world as all previous slides. Headline prominent. DO NOT draw any "swipe next" arrow or forward hint — the carousel ends here. No clickable buttons.`
-
-## 5. План директора (из 03-director.md) — вставляется как есть
-
-```
-=== VISUAL DIRECTOR PLAN (follow this composition) ===
-Layout: {layout}
-Visual elements: {visualElements}
-Background: {background}
-Accent objects: {accentObjects}
-=== END DIRECTOR PLAN ===
+```text
+Create one slide for a cohesive social media carousel. Keep the same visual system across all slides: consistent color palette, lighting, typography mood, spacing, brand feel and composition logic. Each slide must feel unique in scene and camera angle, but part of the same carousel set.
 ```
 
-## 6. Блок референсов — IDENTITY-LOCK (дословно; держит лицо/товар точь-в-точь)
+## 2. Canvas
 
-Порядок фото фиксированный: **product → face → style**. На каждый слайд первой идёт картинка первого слайда (style-anchor), потом активные референсы. Кап 14 фото.
-
-### 6.0 Анализ фото-референса (ОБЯЗАТЕЛЬНО перед lock) — строй промт ОТ ФОТО, не от шаблона
-
-Прежде чем собрать блок lock — **посмотри на приложенное фото и опиши реальный объект словами**, вставь это описание в промт ПЕРЕД блоком lock. Возраст, черты, кожа берутся С ФОТО, а не из головы. Это сильнее абстрактных команд: модель и видит фото, и читает, кто/что на нём (двойная фиксация).
-
-- **Лицо → PERSON DESCRIPTION:** пол, примерный возраст (как на фото!), тип лица, цвет/длина/причёска волос, глаза, нос, челюсть, брови, состояние кожи (чистая/загар/веснушки — как есть), растительность, телосложение, этнотип.
-  Пример (считано с фото): `a slim athletic man in his late twenties, narrow oval face, fair light-brown short hair styled to the side, light grey-blue eyes, straight thin nose, clean healthy lightly-tanned skin, clean-shaven`.
-- **Товар → PRODUCT DESCRIPTION:** тип, форма, пропорции, материалы, цвет, расположение лого/надписей, фактура — как на фото.
-
-⚠️ **Не вставляй шаблонных команд** про возраст/кожу («молодой», «no wrinkles», «smooth skin») — они «от балды» и конфликтуют. Возраст и кожа приходят из ОПИСАНИЯ фото. Особенно для ЛИЦА **убери `no beautification`** из блока ниже — на фотореализме оно читается как «не сглаживай, добавь морщины» и СТАРИТ человека (проверено 2026-06-17). Личность держат фото-референс + точное описание, а не запрет на красоту.
-
-**Товар (PRODUCT REFERENCE):**
-```
-Reproduce the product exactly as shown — identical shape, proportions, logo placement, label layout, colorway, materials, and all packaging text. Invent no new logos, slogans, or microtext. Modify no existing text.
-PRODUCT STORYTELLING — show the product as a VISUAL NARRATIVE across slides:
-- Each slide reveals a DIFFERENT facet: hero beauty shot → in-use action → detail close-up → lifestyle context → advantages/results.
-- Vary angles per slide: front 3/4, side profile, top-down flat-lay, dramatic low angle, macro close-up.
-- Show the product IN CONTEXT of real use: hands interacting, product mounted/installed, product mid-action.
-- Connect visuals to slide TEXT: if the headline mentions a benefit, the image should visually DEMONSTRATE it (e.g., "waterproof" → product in rain/splash; "compact" → product next to everyday objects for scale).
-- Vary environments: studio, outdoor, workspace, lifestyle — never the same background twice.
+```text
+Canvas: vertical 4:5 social carousel slide. Keep important text inside safe margins. Avoid placing key text or faces at the extreme edges.
 ```
 
-**Лицо (FACE REFERENCE — IDENTITY LOCK STRICT):**
-```
-Match the person's face exactly — identical eye shape, nose bridge, jawline, lip proportions, skin tone and texture, hair color and hairstyle, age, ethnicity. No beautification, no identity drift, no altered facial geometry. Place this exact person naturally in the scene.
-PERSON AS ACTIVE PARTICIPANT — a living character in the carousel story:
-- The person must PARTICIPATE naturally: interacting with objects, gesturing, demonstrating, reacting — never a static mannequin or passport photo.
-- Vary EMOTIONS per slide to match content; vary POSES and ANGLES per slide; vary OUTFITS if possible while keeping the same person.
-- The person should feel like the AUTHOR/EXPERT of the carousel.
-If multiple face photos: the first is the primary reference; the rest are extra angles of the same person — use them to stabilize identity.
-If the person is NOT shown on this slide (infographic-only): keep the face reference active so identity holds across the carousel, but don't render the person here.
+Если другой формат:
+
+```text
+Canvas: 9:16 story/reel cover. Keep key text away from top and bottom UI zones.
 ```
 
-⚠️ **Для фотореалистичного ЛИЦА убери `No beautification`** — на фотореализме оно работает как «не сглаживай, добавь морщины» и СТАРИТ человека (проверено 2026-06-17). Возраст/кожу задаёт PERSON DESCRIPTION из анализа фото (6.0), а не запрет на красоту. `No beautification` оставляем только для ТОВАРА (там про точность упаковки, не про кожу).
+## 3. Scene
 
-**Стиль (STYLE REFERENCE — HIGHEST PRIORITY):**
-```
-This is the VISUAL BLUEPRINT. Your #1 job is to make the output look like it belongs to the SAME SERIES as this reference.
-ANALYZE and REPLICATE with maximum precision:
-- COLOR PALETTE: exact hues, saturation, contrast levels. If the ref uses muted pastels — use muted pastels. If bold neons — bold neons.
-- TYPOGRAPHY STYLE: serif vs sans-serif feel, weight, letter spacing, text positioning (centered/left/overlaid on image).
-- LAYOUT STRUCTURE: where text sits relative to visuals, margins, grid alignment, text-to-image ratio.
-- FRAMES & BORDERS: if the ref has rounded corners, borders, frames, divider lines — reproduce them.
-- BACKGROUND TREATMENT: solid color, gradient, photo, texture, blur — match the approach exactly.
-- LIGHTING & MOOD: warm/cool, high-key/low-key, dramatic/soft.
-- CHARACTER/OBJECT POSITIONING: follow the same spatial logic (left third, centered, bottom).
-- GRAPHIC ELEMENTS: icons, shapes, overlays, badges, shadow style — copy the design language.
-Do NOT copy any specific objects, products, logos, faces, or text content from the style reference. Only copy the VISUAL LANGUAGE and apply it to the carousel's own subject.
+Вставь из scene plan:
+
+```text
+Scene: <specific scene>
+Subject: <person/product/object>
+Environment: <place>
+Camera: <shot type, angle, lens feel>
+Lighting: <natural/studio/dramatic/soft>
+Composition: <where subject and text sit>
+Mood: <calm/sharp/premium/playful/etc>
 ```
 
-> **Что осознанно упрощено (а не потеряно по ошибке).** В боевом Vibe у каждого референса есть ещё ветки `User notes about the product / face / style` (текстовые описания, что именно перенести с рефа) и ветки `primary hero / secondary` для случая нескольких фото на одну роль (когда товар или лицо даны несколькими снимками — первый назначается главным, остальные — добивкой деталей/углов). В учебном ките эти ветки сознательно опущены: здесь на каждую роль идёт ОДИН референс без текстового описания, поэтому различать «главный/второстепенный» и подмешивать пользовательские заметки не нужно. Это упрощение под формат урока, а не пропуск.
+## 4. Text zone
 
-## 7. Секция TEXT (КЛЮЧ Варианта Б — модель рисует точные строки) — дословно
+Даже если текст накладывается кодом, prompt должен оставить место под текст.
 
-```
-=== TEXT ===
-[Cover]  Headline: "{HEADLINE}" — bold sans-serif, VERY LARGE (60-80pt), dominates frame.
-         Subtext: "{BODY}" — lighter weight, smaller, below headline, but STILL high-contrast and clearly legible on a phone (white or brand-accent over a darkened strip/scrim) — NEVER low-contrast grey that blends into the photo.
-[Content/CTA]  Headline: "{HEADLINE}" — bold sans-serif, high contrast.
-               Body: "{BODY}" — regular weight, comfortable reading size, below headline, kept high-contrast and legible — not greyed-out, not blending into the background.
-Render ALL text exactly as provided — every word visible.
-If text doesn't fit — reduce font size (minimum 22pt). Never truncate.
-TEXT DUPLICATION BAN: Each text string (headline, body) appears EXACTLY ONCE on the slide. NEVER render the same headline or body twice — not at top AND bottom, not in two different sizes, not as a reflection or echo. One headline placement, one body placement, that is all.
-```
-*(текст в промт подаётся в ВЕРХНЕМ РЕГИСТРЕ — `formatTextForRendering` = .toUpperCase())*
-
-## 8. Финальные ограничения (дословно)
-
-```
-ONE DOMINANT ELEMENT: either headline fills 40%+ of frame, OR one large visual fills 40%+.
-Text must be readable: high-contrast typography, outline/stroke, or a subtle backdrop behind letters ONLY if needed. Avoid large flat panels/cards covering the scene — let the background theme breathe through.
-FORBIDDEN LAYOUT: Never create a "slide within a slide" — no small inset photo/card inside a larger frame, no collage/mosaic, no picture-in-picture. The entire frame is ONE seamless composition with ONE background scene. Text is overlaid directly on the scene, not in a separate panel.
-Professional Instagram quality, sharp and crisp.
-Unique composition — different layout/angle from other slides. (для слайдов 2+)
+```text
+Text zone: leave a clean readable area in the upper third / left side / right side / center card. Do not place detailed objects behind the text zone.
 ```
 
-**Приоритет стиля над раскладкой (если приложен style-реф) — добавляется в КОНЕЦ промта дословно:**
-```
-STYLE REFERENCE TAKES PRIORITY: if the style reference conflicts with any layout or typography instruction above, follow the style reference. The goal is maximum visual similarity to the reference style.
-```
-*(решает конфликт «стиль vs layout»: если стилевой референс расходится с любой инструкцией по раскладке/типографике выше — побеждает референс. Без этой строки модель может проигнорировать стиль ради буквального следования layout-указаниям.)*
+## 5. Exact text section for image-text mode
 
-## 9. Style-anchor + фото-референс — ЖЁСТКОЕ ПРАВИЛО (на каждый слайд ВСЕГДА оба)
+Использовать только если engine passport подтверждает, что выбранный движок держит нужный язык.
 
-**На КАЖДЫЙ слайд серии прикладываются ДВА якоря, без исключений:**
-1. **Слайд 1 (cover) генерится ПЕРВЫМ** — к нему прикладывается только фото лица/товара (style-anchor'а ещё нет).
-2. **Слайды 2…N — ВСЕГДА два референса разом:**
-   - **cover (slide-01)** — style-anchor, держит единый бренд / палитру / типографику;
-   - **фото лица/товара** — держит личность / товар.
-   Прикладывай ОБА на каждый слайд. Не опускай ни один — даже если человек НЕ в кадре на этом слайде, фото остаётся активным (единство лица через серию), и cover остаётся активным (бренд).
-3. Порядок референсов в кадре: **cover (style-anchor) → product → face → style** (кап 14 фото суммарно).
-
-Практика (Codex CLI): slide-01 — `-i фото`; слайды 2…N — `-i slide-01.png -i фото` (повторяй `-i` для каждого; cover первым). На nano-banana — `image_input: [slide-01, фото, ...]`.
-
-## 10. Запрет (бизнес-безопасность маркетплейсов — сохранить)
-
-```
-FORBIDDEN: no Wildberries, WB, Ozon, Yandex, Sber, Avito, VK, Rutube, Dzen, Tinkoff, or Alfa-Bank logos or names anywhere; no watermarks.
+```text
+TEXT TO RENDER EXACTLY:
+Headline: "<headline>"
+Subtext: "<subtext>"
+Language: Russian.
+Render the text exactly as written. Do not translate, paraphrase, add words, remove words or change punctuation. Text must be large, sharp, readable and placed only inside the defined text zone.
 ```
 
----
+Если engine плохо держит текст, не проси его писать текст. Используй code-text mode.
 
-**Итого пайплайн скилла собран:** `01-text-phase` (углы → тексты) → `02-styles` (DNA) → `03-director` (сцены) → `04-image-prompt` (этот файл: финальный промт + identity-lock + текст в кадре). Движок картинок — через toolbox (gpt-image-2 / nano-banana-pro).
+## 6. Code-text mode prompt
+
+Если текст накладывается HTML/CSS, генерируй чистый фон:
+
+```text
+Do not render any text, letters, logos, captions, UI, watermarks or signs. Leave the defined text zone clean for later typography overlay.
+```
+
+## 7. Identity-lock
+
+Если есть лицо:
+
+```text
+Use the attached face reference as identity source. Preserve recognizable facial structure, proportions, hair, age range and natural expression. Do not beautify into a different person. Change only pose, lighting, framing and scene as specified.
+```
+
+Если есть товар:
+
+```text
+Use the attached product reference as source of truth. Preserve exact shape, material, proportions, color, logo placement and packaging details. Do not invent labels or turn it into a generic object.
+```
+
+## 8. Style anchor
+
+Для слайдов 2..N использовать:
+
+```text
+Use slide 01 as style anchor. Match its visual language, color palette, lighting, typography mood and composition logic while creating a new scene for this slide.
+```
+
+Если style reference есть отдельно:
+
+```text
+Use the attached style reference only for visual mood, color, lighting and composition. Do not copy its content or text.
+```
+
+## 9. Negative constraints
+
+Добавляй в каждый prompt:
+
+```text
+Avoid: extra text, misspelled text, watermark, random logos, distorted hands, distorted face, duplicated face, generic stock photo look, cluttered background, low readability, overprocessed beauty filter, incorrect product details, text outside safe margins.
+```
+
+## 10. Prompt template
+
+```text
+Create slide <number> of <total> for a cohesive social media carousel.
+
+Canvas: <aspect ratio and safe area>.
+Style: <style name or custom visual direction>.
+Consistency: match the approved carousel style and keep brand continuity.
+
+Scene: <scene>.
+Subject: <subject>.
+Environment: <environment>.
+Camera and composition: <camera, angle, framing, text zone>.
+Lighting and mood: <lighting, mood>.
+
+<Text section, only for image-text mode>
+
+<Identity-lock, if needed>
+<Style anchor, if slide 2..N>
+
+Avoid: <negative constraints>.
+Output: slide-<NN>.png.
+```
+
+## 11. QA after generation
+
+Проверить каждый слайд:
+
+- текст точный;
+- текст читается на телефоне;
+- нет лишних букв и водяных знаков;
+- лицо/товар узнаваемы;
+- safe margins соблюдены;
+- стиль совпадает с набором;
+- сцена отличается от соседних;
+- слайд выполняет свою роль в slide ladder.
+
+Если текст ошибся, переключиться на code-text mode или перегенерировать только проблемный слайд.
